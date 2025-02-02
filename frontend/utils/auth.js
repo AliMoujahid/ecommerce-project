@@ -14,3 +14,8 @@ export const getToken = () => {
 export const removeToken = () => {
   Cookies.remove("token");
 };
+
+// Function to check if the user is logged in
+export const isAuthenticated = () => {
+  return !!getToken();  // Returns true if the token exists, otherwise false
+};

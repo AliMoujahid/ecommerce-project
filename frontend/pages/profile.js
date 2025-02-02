@@ -1,16 +1,16 @@
 import { useState, useEffect } from "react";
-import API from "../utils/api";
-import { getToken } from "../utils/auth"; // Get token for auth
+import API from "../utils/api"; // Axios instance with Authorization header
+import { getToken } from "../utils/auth"; // Get token from cookies
 
 const ProfilePage = () => {
   const [user, setUser] = useState({ username: "", email: "" });
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Fetch user data on page load
   useEffect(() => {
     const fetchUserData = async () => {
-      const token = getToken();
+      const token = getToken(); // Get the JWT token from cookies
+
       if (!token) {
         setError("You must be logged in to view this page.");
         setLoading(false);
@@ -18,8 +18,10 @@ const ProfilePage = () => {
       }
 
       try {
-        const response = await API.get("/user/profile");
-        setUser(response.data);
+        const response = await API.get("/user/profile", {
+          headers: { Authorization: `Bearer ${token}` },  // Include the token in header
+        });
+        setUser(response.data);  // Set the user data in state
       } catch (err) {
         setError("Error loading user data.");
       } finally {
@@ -32,21 +34,27 @@ const ProfilePage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const token = getToken();
-    if (!token) return;
-
+    const token = getToken(); // Get JWT token from cookies
+  
+    if (!token) {
+      setError("You must be logged in to update your profile.");
+      return;
+    }
+  
     try {
       const response = await API.put("/user/profile", user, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token}`, // Include the token in the Authorization header
         },
       });
-      setUser(response.data); // Update state with the new user data
-      alert("Profile updated successfully");
-    } catch (err) {
+      setUser(response.data); // Set the updated user data
+      alert("Profile updated successfully!"); // Notify the user
+    } catch (error) {
+      console.error("Error updating profile:", error.response ? error.response.data : error);
       setError("Failed to update profile.");
     }
   };
+  
 
   if (loading) {
     return <p>Loading...</p>;
