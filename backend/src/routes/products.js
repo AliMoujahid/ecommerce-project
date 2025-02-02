@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const protect = require("../middleware/authMiddleware");
 
 // Example product data
 const products = [
@@ -8,7 +9,7 @@ const products = [
 ];
 
 // Route to get products
-router.get("/", (req, res) => {
+router.get("/", protect , (req, res) => {
   res.json(products);
 });
 
